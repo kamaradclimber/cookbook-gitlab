@@ -1,5 +1,6 @@
 %RC = (
     UMASK                       =>  <%= @gitolite_umask -%>,
+    LOCAL_CODE                  =>  "$ENV{HOME}/.gitolite/local-code",
     GIT_CONFIG_KEYS             =>  '',
     LOG_EXTRA                   =>  1,
     ROLES                       =>

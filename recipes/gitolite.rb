@@ -17,9 +17,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 #
-%w{ git perl }.each do |cb_include|
-  include_recipe cb_include
-end
 
 # Add git user
 # Password isn't set correctly in original recipe, and really no reason to set one.

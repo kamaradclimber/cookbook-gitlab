@@ -19,8 +19,7 @@
 #
 
 # Include cookbook dependencies
-%w{ ruby_build gitlab::gitolite build-essential
-    readline sudo openssh xml zlib python::package python::pip
+%w{ gitlab::gitolite 
     redisio::install redisio::enable }.each do |requirement|
   include_recipe requirement
 end
@@ -30,25 +29,6 @@ link "/usr/bin/redis-cli" do
   to "/usr/local/bin/redis-cli"
 end
 
-# There are problems deploying on Redhat provided rubies.
-# We'll use Fletcher Nichol's slick ruby_build cookbook to compile a Ruby.
-if node['gitlab']['install_ruby'] !~ /package/
-  ruby_build_ruby node['gitlab']['install_ruby'] 
-
-  # Drop off a profile script.
-  template "/etc/profile.d/gitlab.sh" do
-    owner "root"
-    group "root"
-    mode 0755
-    variables(
-      :fqdn => node['fqdn'],
-      :install_ruby => node['gitlab']['install_ruby']
-    )
-  end
-
-  # Set PATH for remainder of recipe.
-  ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/ruby/#{node['gitlab']['install_ruby']}/bin"
-end
 
 # Install required packages for Gitlab
 node['gitlab']['packages'].each do |pkg|
@@ -68,8 +48,10 @@ end
 end
 
 # Install pygments from pip
-python_pip "pygments" do
-  action :install
+package "python-pip"
+execute "install pygments with pip" do
+  command "pip-python install pygments && touch /var/cache/chef/pygments-pip.installed"
+  creates "/var/cache/chef/pygments-pip.installed"
 end
 
 # Add the gitlab user
@@ -141,6 +123,9 @@ template "#{node['gitlab']['git_home']}/gitlab.pub" do
   owner node['gitlab']['git_user']
   group node['gitlab']['git_group']
   mode 0644
+  variables(
+    :public_key => node['gitlab']['public_key']
+  )
 end
 
 # Configure gitlab user to auto-accept localhost SSH keys
