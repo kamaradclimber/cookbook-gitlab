@@ -150,6 +150,11 @@ execute "install-gitlab-key" do
   not_if "grep -q '#{node['gitlab']['user']}' #{node['gitlab']['git_home']}/.ssh/authorized_keys"
 end
 
+#execute "give access to one admin" do
+#  command "echo '#{node['gitolite']['admin_pub_key']}'>>  #{node['gitlab']['git_home']}/.ssh/authorized_keys"
+#  not_if "grep -q '#{node['gitolite']['admin_pub_key']}' #{node['gitlab']['git_home']}/.ssh/authorized_keys"
+#end
+
 # Clone Gitlab repo from github
 git node['gitlab']['app_home'] do
   repository node['gitlab']['gitlab_url']
@@ -194,7 +199,6 @@ execute "gitlab-bundle-install" do
   user node['gitlab']['user']
   group node['gitlab']['group']
   environment({ 'LANG' => "en_US.UTF-8", 'LC_ALL' => "en_US.UTF-8" })
-  not_if { File.exists?("#{node['gitlab']['app_home']}/vendor/bundle") }
 end
 
 # Setup sqlite database for Gitlab
